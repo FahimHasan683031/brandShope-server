@@ -30,10 +30,16 @@ async function run() {
     await client.connect();
 
     const database = client.db("BrandShop");
-    const productCollection = database.collection("productCollection")
+    const productCollection = database.collection("productCollection");
+    const cartCollection = database.collection("cartCollection");
 
     app.get('/products',async(req,res)=>{
       const result = await productCollection.find().toArray()
+      res.send(result)
+    })
+
+    app.get('/cart',async(req,res)=>{
+      const result = await cartCollection.find().toArray()
       res.send(result)
     })
 
@@ -60,6 +66,12 @@ async function run() {
       res.send(result)
     })
 
+    app.post('/cart',async(req,res)=>{
+      const product = req.body;
+      const result = await cartCollection.insertOne(product)
+      res.send(result)
+    })
+
     app.put('/products/:id', async(req,res)=>{
       const id = req.params.id;
       const product = req.body;
@@ -80,6 +92,15 @@ async function run() {
       const result = await productCollection.updateOne(query,updatedUSer,options)
       res.send(result)
     })
+
+    app.delete("/cart/:name", async (req, res) => {
+      const name = req.params.name;
+      console.log(name)
+      const query = {name : name}
+      const result = await cartCollection.deleteOne(query);
+      console.log(result);
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
